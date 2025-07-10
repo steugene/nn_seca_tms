@@ -31,7 +31,7 @@
     "@nestjs/platform-socket.io": "^10.3.2",
     "@nestjs/swagger": "^7.3.0",
     "@nestjs/typeorm": "^10.0.1",
-    "@nestjs/websockets": "^10.3.2",
+    "@nestjs/websockets": "^11.1.3",
     "@nn-seca-tms/shared": "^1.0.0",
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
