@@ -22,13 +22,17 @@ import { CreateTicketDto } from "./dto/create-ticket.dto";
 import { UpdateTicketDto } from "./dto/update-ticket.dto";
 import { MoveTicketDto } from "./dto/move-ticket.dto";
 import { TicketResponseDto } from "./dto/ticket-response.dto";
+import { AppWebSocketGateway } from "../websocket/websocket.gateway";
 
 @ApiTags("Tickets")
 @Controller("tickets")
 @ApiBearerAuth("JWT-auth")
 @UseGuards(JwtAuthGuard)
 export class TicketsController {
-  constructor(private readonly ticketsService: TicketsService) {}
+  constructor(
+    private readonly ticketsService: TicketsService,
+    private readonly webSocketGateway: AppWebSocketGateway,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: "Create a new ticket" })
@@ -41,7 +45,9 @@ export class TicketsController {
     @Body() createTicketDto: CreateTicketDto,
     @CurrentUser() user: User,
   ): Promise<TicketResponseDto> {
-    return await this.ticketsService.create(createTicketDto, user.id);
+    const ticket = await this.ticketsService.create(createTicketDto, user.id);
+    this.webSocketGateway.emitTicketCreated(ticket);
+    return ticket;
   }
 
   @Get()
@@ -93,7 +99,9 @@ export class TicketsController {
     @Body() updateTicketDto: UpdateTicketDto,
     @CurrentUser() user: User,
   ): Promise<TicketResponseDto> {
-    return await this.ticketsService.update(id, updateTicketDto, user.id);
+    const ticket = await this.ticketsService.update(id, updateTicketDto, user.id);
+    this.webSocketGateway.emitTicketUpdated(ticket);
+    return ticket;
   }
 
   @Put(":id/move")
@@ -109,8 +117,18 @@ export class TicketsController {
     @Body() moveTicketDto: MoveTicketDto,
     @CurrentUser() user: User,
   ): Promise<TicketResponseDto> {
+    const originalTicket = await this.ticketsService.findOne(id);
     const moveData = { ...moveTicketDto, ticketId: id };
-    return await this.ticketsService.move(moveData, user.id);
+    const movedTicket = await this.ticketsService.move(moveData, user.id);
+    
+    this.webSocketGateway.emitTicketMoved({
+      ticket: movedTicket,
+      oldColumnId: originalTicket.columnId,
+      newColumnId: movedTicket.columnId,
+      boardId: movedTicket.boardId,
+    });
+    
+    return movedTicket;
   }
 
   @Delete(":id")
@@ -121,7 +139,9 @@ export class TicketsController {
     @Param("id") id: string,
     @CurrentUser() user: User,
   ): Promise<{ message: string }> {
+    const ticket = await this.ticketsService.findOne(id);
     await this.ticketsService.remove(id, user.id);
+    this.webSocketGateway.emitTicketDeleted(ticket.id, ticket.boardId);
     return { message: "Ticket deleted successfully" };
   }
 }
