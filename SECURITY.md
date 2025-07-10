@@ -58,4 +58,4 @@ npm audit fix --force
 
 ## Reporting Security Issues
 
-If you discover a security vulnerability in this project, please report it by emailing [security contact] or creating a private GitHub issue. 
+If you discover a security vulnerability in this project, please create  GitHub issue. 
