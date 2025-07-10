@@ -37,7 +37,7 @@ make setup
 # Start development environment
 make dev
 
-# Setup database (in another terminal)
+# Setup database
 make db-setup
 ```
 
