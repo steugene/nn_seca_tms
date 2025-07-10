@@ -1,0 +1,121 @@
+@use '@angular/material' as mat;
+
+// Define custom typography
+$custom-typography: mat.define-typography-config(
+  $font-family: '"Inter", "Roboto", "Helvetica Neue", sans-serif',
+);
+
+// Define the light theme
+$light-primary: mat.define-palette(mat.$indigo-palette);
+$light-accent: mat.define-palette(mat.$blue-palette, A200, A100, A400);
+$light-warn: mat.define-palette(mat.$red-palette);
+
+$light-theme: mat.define-light-theme((
+  color: (
+    primary: $light-primary,
+    accent: $light-accent,
+    warn: $light-warn,
+  ),
+  typography: $custom-typography,
+  density: 0,
+));
+
+// Define the dark theme
+$dark-primary: mat.define-palette(mat.$blue-grey-palette);
+$dark-accent: mat.define-palette(mat.$cyan-palette, A200, A100, A400);
+$dark-warn: mat.define-palette(mat.$red-palette);
+
+$dark-theme: mat.define-dark-theme((
+  color: (
+    primary: $dark-primary,
+    accent: $dark-accent,
+    warn: $dark-warn,
+  ),
+  typography: $custom-typography,
+  density: 0,
+));
+
+// Apply default light theme globally
+@include mat.all-component-themes($light-theme);
+
+// Custom CSS variables for theming
+:root {
+  // Light theme variables (default)
+  --background-color: #f5f5f5;
+  --surface-color: #ffffff;
+  --text-primary: rgba(0, 0, 0, 0.87);
+  --text-secondary: rgba(0, 0, 0, 0.6);
+  --text-disabled: rgba(0, 0, 0, 0.38);
+  --divider-color: rgba(0, 0, 0, 0.12);
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --border-color: #e0e0e0;
+  --hover-color: rgba(0, 0, 0, 0.04);
+  --selected-color: rgba(63, 81, 181, 0.08);
+}
+
+// Light theme class (override if needed)
+.light-theme {
+  --background-color: #f5f5f5;
+  --surface-color: #ffffff;
+  --text-primary: rgba(0, 0, 0, 0.87);
+  --text-secondary: rgba(0, 0, 0, 0.6);
+  --text-disabled: rgba(0, 0, 0, 0.38);
+  --divider-color: rgba(0, 0, 0, 0.12);
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --border-color: #e0e0e0;
+  --hover-color: rgba(0, 0, 0, 0.04);
+  --selected-color: rgba(63, 81, 181, 0.08);
+}
+
+// Dark theme styles
+.dark-theme {
+  @include mat.all-component-colors($dark-theme);
+  
+  --background-color: #121212;
+  --surface-color: #1e1e1e;
+  --text-primary: rgba(255, 255, 255, 0.87);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-disabled: rgba(255, 255, 255, 0.38);
+  --divider-color: rgba(255, 255, 255, 0.12);
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --border-color: #333333;
+  --hover-color: rgba(255, 255, 255, 0.04);
+  --selected-color: rgba(144, 164, 174, 0.08);
+}
+
+// Global theme-aware styles
+body {
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  margin: 0;
+  font-family: "Inter", "Roboto", "Helvetica Neue", sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+// Override Material components for better dark theme support
+.dark-theme {
+  .mat-mdc-card {
+    background: var(--surface-color);
+    color: var(--text-primary);
+  }
+
+  .mat-mdc-dialog-container {
+    background: var(--surface-color);
+    color: var(--text-primary);
+  }
+
+  .mat-mdc-snack-bar-container {
+    background: #333333;
+    color: var(--text-primary);
+  }
+
+  .mat-mdc-form-field {
+    .mat-mdc-form-field-subscript-wrapper {
+      color: var(--text-secondary);
+    }
+  }
+
+  .cdk-overlay-backdrop {
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+} 

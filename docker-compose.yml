@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: nn-seca-tms-db
+    environment:
+      POSTGRES_DB: nn_seca_tms
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: nn-seca-tms-server
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: nn_seca_tms
+      JWT_SECRET: your-jwt-secret-key
+      JWT_EXPIRES_IN: 1h
+      JWT_REFRESH_SECRET: your-jwt-refresh-secret-key
+      JWT_REFRESH_EXPIRES_IN: 7d
+      CLIENT_URL: http://localhost:4200
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./server:/app/server
+      - ./shared:/app/shared
+      - /app/server/node_modules
+      - /app/shared/node_modules
+    command: npm run dev
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    container_name: nn-seca-tms-client
+    depends_on:
+      - server
+    environment:
+      NODE_ENV: development
+      API_URL: http://localhost:3000
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./client:/app/client
+      - ./shared:/app/shared
+      - /app/client/node_modules
+      - /app/shared/node_modules
+    command: npm run dev
+
+volumes:
+  postgres_data: 

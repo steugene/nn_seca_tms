@@ -1,0 +1,67 @@
+@use '@angular/material' as mat;
+
+// Include the core Material styles
+@include mat.core();
+
+// Import our themes
+@import './themes.scss';
+
+// Global styles
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+// Common utility classes
+.container {
+  padding: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.mt-16 { margin-top: 16px; }
+.mb-16 { margin-bottom: 16px; }
+.ml-16 { margin-left: 16px; }
+.mr-16 { margin-right: 16px; }
+.p-16 { padding: 16px; }
+
+.text-center {
+  text-align: center;
+}
+
+// Theme-aware snackbar styles
+.success-snackbar {
+  --mdc-snackbar-container-color: #4caf50 !important;
+  --mdc-snackbar-supporting-text-color: white !important;
+}
+
+.error-snackbar {
+  --mdc-snackbar-container-color: #f44336 !important;
+  --mdc-snackbar-supporting-text-color: white !important;
+}
+
+// Responsive utilities
+.responsive-container {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .responsive-container {
+    padding: 8px;
+  }
+}

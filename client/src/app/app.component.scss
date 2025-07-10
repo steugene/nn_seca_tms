@@ -1,0 +1,44 @@
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  .toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .theme-toggle {
+      mat-icon {
+        color: rgba(255, 255, 255, 0.87);
+      }
+    }
+  }
+
+  .user-menu {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .user-info {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.87);
+    }
+  }
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  background-color: var(--background-color);
+}
+
+.spacer {
+  flex: 1;
+}

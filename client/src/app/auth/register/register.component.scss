@@ -1,0 +1,17 @@
+@import "../login/login.component.scss";
+
+.name-row {
+  display: flex;
+  gap: 16px;
+
+  .half-width {
+    flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .name-row {
+    flex-direction: column;
+    gap: 0;
+  }
+}

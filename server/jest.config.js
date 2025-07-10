@@ -1,0 +1,31 @@
+module.exports = {
+  displayName: 'server',
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  rootDir: '.',
+  testMatch: ['<rootDir>/src/**/*.spec.ts', '<rootDir>/test/**/*.test.ts'],
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/**/*.spec.ts',
+    '!src/database/migrations/*.ts',
+    '!src/database/seeds/*.ts',
+    '!src/main.ts',
+    '!src/**/*.dto.ts',
+    '!src/**/*.entity.ts',
+  ],
+  coverageDirectory: 'coverage',
+  coverageReporters: ['text', 'lcov', 'html'],
+  moduleFileExtensions: ['js', 'json', 'ts'],
+  transform: {
+    '^.+\\.(t|j)s$': 'ts-jest',
+  },
+  moduleNameMapper: {
+    '^@nn-seca-tms/shared$': '<rootDir>/../shared/src/index.ts',
+    '^@shared/(.*)$': '<rootDir>/../shared/src/$1',
+  },
+  setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
+  testTimeout: 10000,
+  maxWorkers: 1,
+  forceExit: true,
+  detectOpenHandles: true,
+}; 

@@ -1,0 +1,123 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>Edit Ticket</h2>
+
+  <mat-dialog-content>
+    <!-- Ticket Info -->
+    <div class="ticket-info">
+      <div class="info-item">
+        <span class="label">Created:</span>
+        <span class="value">{{ formatDate(data.ticket.createdAt) }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Last Updated:</span>
+        <span class="value">{{ formatDate(data.ticket.updatedAt) }}</span>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <form [formGroup]="editTicketForm">
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Ticket Title</mat-label>
+        <input
+          matInput
+          formControlName="title"
+          placeholder="Enter ticket title"
+          maxlength="100"
+        />
+        <mat-hint align="end"
+          >{{ editTicketForm.get("title")?.value?.length || 0 }}/100</mat-hint
+        >
+        <mat-error *ngIf="editTicketForm.get('title')?.hasError('required')">
+          Ticket title is required
+        </mat-error>
+        <mat-error *ngIf="editTicketForm.get('title')?.hasError('minlength')">
+          Title must be at least 3 characters long
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Description (Optional)</mat-label>
+        <textarea
+          matInput
+          formControlName="description"
+          placeholder="Enter ticket description"
+          rows="4"
+          maxlength="500"
+        >
+        </textarea>
+        <mat-hint align="end"
+          >{{
+            editTicketForm.get("description")?.value?.length || 0
+          }}/500</mat-hint
+        >
+        <mat-error
+          *ngIf="editTicketForm.get('description')?.hasError('maxlength')"
+        >
+          Description cannot exceed 500 characters
+        </mat-error>
+      </mat-form-field>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Priority</mat-label>
+          <mat-select formControlName="priority">
+            <mat-option
+              *ngFor="let priority of priorities"
+              [value]="priority.value"
+            >
+              <div class="priority-option">
+                <div
+                  class="priority-indicator"
+                  [style.background-color]="priority.color"
+                ></div>
+                {{ priority.label }}
+              </div>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Column</mat-label>
+          <mat-select formControlName="columnId">
+            <mat-option *ngFor="let column of data.columns" [value]="column.id">
+              {{ column.title }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Assign To (Optional)</mat-label>
+        <mat-select formControlName="assignedTo">
+          <mat-option value="">Unassigned</mat-option>
+          <mat-option *ngFor="let user of data.users" [value]="user.id">
+            <div class="user-option">
+              <div class="user-avatar">
+                {{ user.firstName.charAt(0) + user.lastName.charAt(0) }}
+              </div>
+              {{ getUserName(user) }}
+            </div>
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" [disabled]="loading">Cancel</button>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onSubmit()"
+      [disabled]="!editTicketForm.valid || loading"
+    >
+      <mat-spinner
+        *ngIf="loading"
+        diameter="16"
+        class="button-spinner"
+      ></mat-spinner>
+      {{ loading ? "Updating..." : "Update Ticket" }}
+    </button>
+  </mat-dialog-actions>
+</div>

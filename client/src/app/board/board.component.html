@@ -1,0 +1,232 @@
+<div class="board-container">
+  <div class="board-header">
+    <div class="header-left">
+      <button mat-icon-button (click)="goBack()" matTooltip="Back to Dashboard">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="board-info">
+        <h1>{{ board?.title || "Loading..." }}</h1>
+        <p *ngIf="board?.description" class="board-description">
+          {{ board?.description }}
+        </p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="user-avatars" *ngIf="users.length > 0">
+        <div
+          *ngFor="let user of users.slice(0, 5)"
+          class="user-avatar"
+          [matTooltip]="user.firstName + ' ' + user.lastName"
+        >
+          {{ getInitials(user.firstName + " " + user.lastName) }}
+        </div>
+        <div *ngIf="users.length > 5" class="user-avatar more-users">
+          +{{ users.length - 5 }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading" class="filter-sort-container">
+    <div class="filter-controls">
+      <div class="controls-row">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Assigned To</mat-label>
+          <mat-select
+            [(ngModel)]="filters.assignedTo"
+            (selectionChange)="onFilterChange()"
+          >
+            <mat-option value="">All Users</mat-option>
+            <mat-option *ngFor="let user of users" [value]="user.id">
+              {{ user.firstName }} {{ user.lastName }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Priority</mat-label>
+          <mat-select
+            [(ngModel)]="filters.priority"
+            (selectionChange)="onFilterChange()"
+          >
+            <mat-option value="">All Priorities</mat-option>
+            <mat-option *ngFor="let priority of priorityOptions" [value]="priority.value">
+              {{ priority.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Sort By</mat-label>
+          <mat-select
+            [(ngModel)]="sortOptions.sortBy"
+            (selectionChange)="onSortChange()"
+          >
+            <mat-option *ngFor="let sort of sortByOptions" [value]="sort.value">
+              {{ sort.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Sort Order</mat-label>
+          <mat-select
+            [(ngModel)]="sortOptions.sortOrder"
+            (selectionChange)="onSortChange()"
+          >
+            <mat-option value="desc">Descending</mat-option>
+            <mat-option value="asc">Ascending</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button
+          mat-stroked-button
+          color="primary"
+          (click)="clearFilters()"
+          *ngIf="hasActiveFilters()"
+          class="clear-filters-btn"
+        >
+          Clear Filters
+        </button>
+      </div>
+
+      <div *ngIf="hasActiveFilters()" class="active-filters">
+        <span class="filter-label">Active filters:</span>
+        
+        <mat-chip-listbox *ngIf="filters.assignedTo || filters.priority">
+          <mat-chip-option
+            *ngIf="filters.assignedTo"
+            (removed)="clearAssignedToFilter()"
+          >
+            Assigned: {{ getUserById(filters.assignedTo)?.firstName }} {{ getUserById(filters.assignedTo)?.lastName }}
+            <mat-icon matChipRemove>cancel</mat-icon>
+          </mat-chip-option>
+          
+          <mat-chip-option
+            *ngIf="filters.priority"
+            (removed)="clearPriorityFilter()"
+          >
+            Priority: {{ filters.priority }}
+            <mat-icon matChipRemove>cancel</mat-icon>
+          </mat-chip-option>
+        </mat-chip-listbox>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading board...</p>
+  </div>
+
+  <div *ngIf="!loading" class="kanban-board" cdkDropListGroup>
+    <div
+      *ngFor="let column of columns"
+      class="column"
+      [id]="column.id"
+      cdkDropList
+      [cdkDropListData]="getTicketsByColumn(column.id)"
+      (cdkDropListDropped)="onDrop($event)"
+    >
+      <div class="column-header">
+        <div class="column-title">
+          <h3>{{ column.title }}</h3>
+          <span class="ticket-count">{{
+            getTicketsByColumn(column.id).length
+          }}</span>
+        </div>
+        <button
+          mat-icon-button
+          (click)="openCreateTicketDialog(column.id)"
+          matTooltip="Add ticket"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+
+      <div class="tickets-container">
+        <div
+          *ngFor="let ticket of getTicketsByColumn(column.id)"
+          class="ticket-card"
+          [class]="'priority-' + ticket.priority.toLowerCase()"
+          cdkDrag
+          [cdkDragData]="ticket"
+          (click)="openEditTicketDialog(ticket)"
+        >
+          <div class="ticket-header">
+            <div
+              class="ticket-priority"
+              [style.background-color]="getPriorityColor(ticket.priority)"
+            >
+              {{ ticket.priority }}
+            </div>
+            <button
+              mat-icon-button
+              class="ticket-menu"
+              (click)="deleteTicket(ticket, $event)"
+              matTooltip="Delete ticket"
+            >
+              <mat-icon>more_vert</mat-icon>
+            </button>
+          </div>
+
+          <div class="ticket-content">
+            <h4 class="ticket-title">{{ ticket.title }}</h4>
+            <p *ngIf="ticket.description" class="ticket-description">
+              {{ ticket.description }}
+            </p>
+          </div>
+
+          <div class="ticket-footer" *ngIf="ticket.assignedTo">
+            <div class="assigned-user">
+              <div class="user-avatar small">
+                {{
+                  getInitials(
+                    getUserById(ticket.assignedTo)?.firstName +
+                      " " +
+                      getUserById(ticket.assignedTo)?.lastName || "U"
+                  )
+                }}
+              </div>
+              <span class="user-name">
+                {{ getUserById(ticket.assignedTo)?.firstName }}
+                {{ getUserById(ticket.assignedTo)?.lastName }}
+              </span>
+            </div>
+          </div>
+
+          <div *cdkDragPreview class="ticket-drag-preview">
+            <div class="ticket-card preview">
+              <div class="ticket-header">
+                <div
+                  class="ticket-priority"
+                  [style.background-color]="getPriorityColor(ticket.priority)"
+                >
+                  {{ ticket.priority }}
+                </div>
+              </div>
+              <div class="ticket-content">
+                <h4 class="ticket-title">{{ ticket.title }}</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          *ngIf="getTicketsByColumn(column.id).length === 0"
+          class="empty-column"
+        >
+          <mat-icon>assignment</mat-icon>
+          <p>No tickets yet</p>
+          <button
+            mat-button
+            color="primary"
+            (click)="openCreateTicketDialog(column.id)"
+          >
+            Add First Ticket
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

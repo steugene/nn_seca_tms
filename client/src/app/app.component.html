@@ -1,0 +1,41 @@
+<div class="app-container">
+  <mat-toolbar color="primary" class="toolbar">
+    <mat-toolbar-row>
+      <span>{{ title }}</span>
+      <span class="spacer"></span>
+
+      <div *ngIf="isAuthenticated" class="toolbar-actions">
+        <button 
+          mat-icon-button 
+          (click)="toggleTheme()"
+          [attr.aria-label]="(isDarkMode$ | async) ? 'Switch to light mode' : 'Switch to dark mode'"
+          class="theme-toggle">
+          <mat-icon>{{ (isDarkMode$ | async) ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
+        
+        <div class="user-menu">
+          <span class="user-info"
+            >{{ currentUser?.firstName }} {{ currentUser?.lastName }}</span
+          >
+          <button mat-icon-button [matMenuTriggerFor]="userMenu">
+            <mat-icon>account_circle</mat-icon>
+          </button>
+          <mat-menu #userMenu="matMenu">
+            <button mat-menu-item routerLink="/dashboard">
+              <mat-icon>dashboard</mat-icon>
+              <span>Dashboard</span>
+            </button>
+            <button mat-menu-item (click)="onLogout()">
+              <mat-icon>logout</mat-icon>
+              <span>Logout</span>
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>
