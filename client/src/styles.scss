@@ -1,67 +1,36 @@
 @use '@angular/material' as mat;
 
-// Include the core Material styles
 @include mat.core();
 
-// Import our themes
-@import './themes.scss';
+$primary: mat.define-palette(mat.$indigo-palette);
+$accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+$warn: mat.define-palette(mat.$red-palette);
 
-// Global styles
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
+$theme: mat.define-light-theme((
+  color: (
+    primary: $primary,
+    accent: $accent,
+    warn: $warn,
+  ),
+  typography: mat.define-typography-config(),
+  density: 0,
+));
+
+@include mat.all-component-themes($theme);
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.mat-mdc-card {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
 }
 
-// Common utility classes
-.container {
-  padding: 16px;
-}
-
-.full-width {
-  width: 100%;
-}
-
-.center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.spacer {
-  flex: 1 1 auto;
-}
-
-.mt-16 { margin-top: 16px; }
-.mb-16 { margin-bottom: 16px; }
-.ml-16 { margin-left: 16px; }
-.mr-16 { margin-right: 16px; }
-.p-16 { padding: 16px; }
-
-.text-center {
-  text-align: center;
-}
-
-// Theme-aware snackbar styles
 .success-snackbar {
-  --mdc-snackbar-container-color: #4caf50 !important;
-  --mdc-snackbar-supporting-text-color: white !important;
+  --mdc-snackbar-container-color: #4caf50;
+  --mdc-snackbar-supporting-text-color: white;
 }
 
 .error-snackbar {
-  --mdc-snackbar-container-color: #f44336 !important;
-  --mdc-snackbar-supporting-text-color: white !important;
-}
-
-// Responsive utilities
-.responsive-container {
-  padding: 16px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-@media (max-width: 768px) {
-  .responsive-container {
-    padding: 8px;
-  }
+  --mdc-snackbar-container-color: #f44336;
+  --mdc-snackbar-supporting-text-color: white;
 }
