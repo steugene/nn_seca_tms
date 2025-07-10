@@ -33,7 +33,7 @@
     "@nestjs/typeorm": "^10.0.1",
     "@nestjs/websockets": "^10.3.2",
     "@nn-seca-tms/shared": "^1.0.0",
-    "bcryptjs": "^2.4.3",
+    "bcryptjs": "^3.0.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "passport": "^0.7.0",
