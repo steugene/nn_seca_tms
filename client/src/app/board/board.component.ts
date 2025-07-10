@@ -63,6 +63,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   ];
 
   private destroy$ = new Subject<void>();
+  private webSocketListenersSetup = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -82,8 +83,33 @@ export class BoardComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadFiltersFromUrl();
     this.loadBoardData();
-    this.setupWebSocketListeners();
-    this.webSocketService.joinBoard(this.boardId);
+    this.connectWebSocket();
+  }
+
+  private connectWebSocket(): void {
+    console.log('Connecting to WebSocket for board:', this.boardId);
+    
+    if (!this.webSocketService.isConnected()) {
+      console.log('WebSocket not connected, connecting now...');
+      this.webSocketService.connect();
+    }
+    
+    this.webSocketService.connected$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((connected) => {
+        console.log('WebSocket connection status:', connected);
+        if (connected) {
+          console.log('WebSocket connected, setting up listeners and joining board');
+          this.setupWebSocketListeners();
+          this.webSocketService.joinBoard(this.boardId);
+        }
+      });
+    
+    if (this.webSocketService.isConnected()) {
+      console.log('WebSocket already connected, setting up listeners and joining board');
+      this.setupWebSocketListeners();
+      this.webSocketService.joinBoard(this.boardId);
+    }
   }
 
   ngOnDestroy(): void {
@@ -158,21 +184,32 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   setupWebSocketListeners(): void {
+    if (this.webSocketListenersSetup) {
+      return;
+    }
+    
+    this.webSocketListenersSetup = true;
+    console.log('Setting up WebSocket listeners for board:', this.boardId);
+
     this.webSocketService.onTicketCreated$
       .pipe(takeUntil(this.destroy$))
       .subscribe((event) => {
+        console.log('Received ticket created event:', event);
         if (event && event.ticket && event.boardId === this.boardId) {
           this.tickets.push(event.ticket);
+          console.log('Added new ticket to board');
         }
       });
 
     this.webSocketService.onTicketUpdated$
       .pipe(takeUntil(this.destroy$))
       .subscribe((event) => {
+        console.log('Received ticket updated event:', event);
         if (event && event.ticket && event.boardId === this.boardId) {
           const index = this.tickets.findIndex((t) => t.id === event.ticket.id);
           if (index !== -1) {
             this.tickets[index] = event.ticket;
+            console.log('Updated ticket in board');
           }
         }
       });
@@ -180,18 +217,22 @@ export class BoardComponent implements OnInit, OnDestroy {
     this.webSocketService.onTicketDeleted$
       .pipe(takeUntil(this.destroy$))
       .subscribe((event) => {
+        console.log('Received ticket deleted event:', event);
         if (event && event.ticketId && event.boardId === this.boardId) {
           this.tickets = this.tickets.filter((t) => t.id !== event.ticketId);
+          console.log('Removed ticket from board');
         }
       });
 
     this.webSocketService.onTicketMoved$
       .pipe(takeUntil(this.destroy$))
       .subscribe((event) => {
+        console.log('Received ticket moved event:', event);
         if (event && event.ticket && event.boardId === this.boardId) {
           const index = this.tickets.findIndex((t) => t.id === event.ticket.id);
           if (index !== -1) {
             this.tickets[index] = event.ticket;
+            console.log('Updated moved ticket in board');
           }
         }
       });

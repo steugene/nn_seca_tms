@@ -7,7 +7,7 @@ h2[mat-dialog-title] {
   margin: 0 0 16px 0;
   font-size: 24px;
   font-weight: 500;
-  color: rgba(0, 0, 0, 0.87);
+  color: var(--text-primary);
 }
 
 .ticket-info {
@@ -22,13 +22,13 @@ h2[mat-dialog-title] {
 
     .label {
       font-size: 12px;
-      color: rgba(0, 0, 0, 0.6);
+      color: var(--text-secondary);
       font-weight: 500;
     }
 
     .value {
       font-size: 14px;
-      color: rgba(0, 0, 0, 0.87);
+      color: var(--text-primary);
     }
   }
 }

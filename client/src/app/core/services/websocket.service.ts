@@ -115,6 +115,7 @@ export class WebSocketService {
 
   public connect(): void {
     const token = this.authService.getToken();
+    console.log('WebSocket connect called, token exists:', !!token, 'already connected:', this.socket?.connected);
     if (token && !this.socket.connected) {
       this.socket.auth = { token };
       this.socket.connect();
@@ -122,29 +123,49 @@ export class WebSocketService {
   }
 
   public disconnect(): void {
+    console.log('WebSocket disconnect called');
     if (this.socket && this.socket.connected) {
       this.socket.disconnect();
     }
   }
 
   public reconnect(): void {
+    console.log('WebSocket reconnect called');
     this.disconnect();
     this.connect();
   }
 
   public isConnected(): boolean {
-    return this.socket?.connected || false;
+    const connected = this.socket?.connected || false;
+    console.log('WebSocket isConnected check:', connected);
+    return connected;
   }
 
   joinBoard(boardId: string): void {
-    if (this.socket && this.socket.connected) {
-      this.socket.emit(WebSocketEvents.JOIN_BOARD, { boardId });
+    const currentUser = this.authService.currentUser;
+    console.log('Joining board:', boardId, 'user:', currentUser?.username, 'socket connected:', this.socket?.connected);
+    if (this.socket && this.socket.connected && currentUser) {
+      this.socket.emit(WebSocketEvents.JOIN_BOARD, { 
+        boardId,
+        userId: currentUser.id,
+        username: currentUser.username
+      });
+      console.log('Emitted JOIN_BOARD event');
+    } else {
+      console.log('Cannot join board - socket:', !!this.socket, 'connected:', this.socket?.connected, 'user:', !!currentUser);
     }
   }
 
   leaveBoard(boardId: string): void {
-    if (this.socket && this.socket.connected) {
-      this.socket.emit(WebSocketEvents.LEAVE_BOARD, { boardId });
+    const currentUser = this.authService.currentUser;
+    console.log('Leaving board:', boardId, 'user:', currentUser?.username);
+    if (this.socket && this.socket.connected && currentUser) {
+      this.socket.emit(WebSocketEvents.LEAVE_BOARD, { 
+        boardId,
+        userId: currentUser.id,
+        username: currentUser.username
+      });
+      console.log('Emitted LEAVE_BOARD event');
     }
   }
 }

@@ -31,9 +31,12 @@ export class AppWebSocketGateway
   private userSockets = new Map<string, string>();
   private boardUsers = new Map<string, Set<string>>();
 
-  handleConnection(_client: Socket) {}
+  handleConnection(client: Socket) {
+    console.log('WebSocket client connected:', client.id);
+  }
 
   handleDisconnect(client: Socket) {
+    console.log('WebSocket client disconnected:', client.id);
     let userIdToRemove: string | undefined;
 
     for (const [userId, socketId] of this.userSockets.entries()) {
@@ -44,6 +47,7 @@ export class AppWebSocketGateway
     }
 
     if (userIdToRemove) {
+      console.log('Removing user from socket mapping:', userIdToRemove);
       this.userSockets.delete(userIdToRemove);
 
       for (const [boardId, users] of this.boardUsers.entries()) {
@@ -63,6 +67,7 @@ export class AppWebSocketGateway
     @MessageBody() data: JoinBoardEvent,
     @ConnectedSocket() client: Socket,
   ): void {
+    console.log('User joining board:', data);
     this.userSockets.set(data.userId, client.id);
 
     if (!this.boardUsers.has(data.boardId)) {
@@ -71,8 +76,8 @@ export class AppWebSocketGateway
 
     this.boardUsers.get(data.boardId)?.add(data.userId);
     client.join(data.boardId);
+    console.log('User joined board room:', data.boardId, 'Users in board:', this.boardUsers.get(data.boardId)?.size);
 
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     void this.emitUserJoinedBoard(data.boardId, data.userId, data.username);
   }
 
@@ -81,65 +86,57 @@ export class AppWebSocketGateway
     @MessageBody() data: JoinBoardEvent,
     @ConnectedSocket() client: Socket,
   ): void {
+    console.log('User leaving board:', data);
     this.userSockets.delete(data.userId);
     client.leave(data.boardId);
 
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     void this.emitUserLeftBoard(data.boardId, data.userId);
   }
 
   emitTicketCreated(ticket: { boardId: string }) {
+    console.log('Emitting ticket created event for board:', ticket.boardId);
     this.server.to(ticket.boardId).emit(WebSocketEvents.TICKET_CREATED, {
-      event: WebSocketEvents.TICKET_CREATED,
       ticket,
-      timestamp: new Date(),
+      boardId: ticket.boardId,
     });
   }
 
   emitTicketUpdated(ticket: { boardId: string }) {
+    console.log('Emitting ticket updated event for board:', ticket.boardId);
     this.server.to(ticket.boardId).emit(WebSocketEvents.TICKET_UPDATED, {
-      event: WebSocketEvents.TICKET_UPDATED,
       ticket,
-      timestamp: new Date(),
+      boardId: ticket.boardId,
     });
   }
 
   emitTicketDeleted(ticketId: string, boardId: string) {
     this.server.to(boardId).emit(WebSocketEvents.TICKET_DELETED, {
-      event: WebSocketEvents.TICKET_DELETED,
       ticketId,
       boardId,
-      timestamp: new Date(),
     });
   }
 
   emitTicketMoved(data: TicketMovedEvent) {
     this.server.to(data.boardId).emit(WebSocketEvents.TICKET_MOVED, {
-      event: WebSocketEvents.TICKET_MOVED,
       ticket: data.ticket,
       oldColumnId: data.oldColumnId,
       newColumnId: data.newColumnId,
       boardId: data.boardId,
-      timestamp: new Date(),
     });
   }
 
   emitUserJoinedBoard(boardId: string, userId: string, username: string) {
     this.server.to(boardId).emit(WebSocketEvents.USER_JOINED_BOARD, {
-      event: WebSocketEvents.USER_JOINED_BOARD,
       userId,
       username,
       boardId,
-      timestamp: new Date(),
     });
   }
 
   emitUserLeftBoard(boardId: string, userId: string) {
     this.server.to(boardId).emit(WebSocketEvents.USER_LEFT_BOARD, {
-      event: WebSocketEvents.USER_LEFT_BOARD,
       userId,
       boardId,
-      timestamp: new Date(),
     });
   }
 }
