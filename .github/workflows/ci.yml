@@ -130,11 +130,11 @@ jobs:
     
     - name: Build Docker images
       run: |
-        docker-compose build --no-cache
+        docker compose build --no-cache
     
     - name: Test Docker setup
       run: |
-        docker-compose up -d
+        docker compose up -d
         sleep 30
-        docker-compose ps
-        docker-compose down 
+        docker compose ps
+        docker compose down 
