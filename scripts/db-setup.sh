@@ -131,7 +131,7 @@ check_connection() {
     
     cd "$PROJECT_ROOT/server" || exit 1
     
-    if timeout 30 npx ts-node -e "
+    if npx ts-node -e "
     import { AppDataSource } from './src/database/data-source';
     AppDataSource.initialize()
       .then(() => {
