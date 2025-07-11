@@ -6,45 +6,59 @@ echo "Setting up database..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
+print_status() {
+    echo "⏳ $1"
+}
+
+print_success() {
+    echo "✓ $1"
+}
+
+print_error() {
+    echo "✗ $1"
+}
+
+print_warning() {
+    echo "⚠ $1"
+}
+
 check_env() {
     if [ ! -f "$PROJECT_ROOT/.env" ]; then
-        echo "✗ .env file not found"
+        print_error ".env file not found"
         exit 1
     fi
 }
 
 check_docker() {
     if ! docker info > /dev/null 2>&1; then
-        echo "✗ Docker not running"
+        print_error "Docker not running"
         exit 1
     fi
 }
 
 wait_for_db() {
-    echo "Waiting for database..."
+    print_status "Waiting for database..."
     local max_attempts=60
     local attempt=1
     
     while [ $attempt -le $max_attempts ]; do
         if docker exec nn-seca-tms-db pg_isready -U postgres > /dev/null 2>&1; then
-            echo "✓ Database ready"
+            print_success "Database ready"
             return 0
         fi
         sleep 2
         attempt=$((attempt + 1))
     done
     
-    echo "✗ Database failed to start"
+    print_error "Database failed to start"
     return 1
 }
 
-# Run database migrations
 run_migrations() {
     print_status "Running database migrations..."
     
     cd "$PROJECT_ROOT/server" || exit 1
     
-    # Check if node_modules exists
     if [ ! -d "node_modules" ]; then
         print_status "Installing server dependencies..."
         if npm install; then
@@ -55,7 +69,6 @@ run_migrations() {
         fi
     fi
     
-    # Run migrations
     if npm run migration:run; then
         print_success "Migrations completed successfully"
     else
@@ -64,14 +77,12 @@ run_migrations() {
     fi
 }
 
-# Run database seeds
 run_seeds() {
     print_status "Running database seeds..."
     
     cd "$PROJECT_ROOT/server" || exit 1
     
-    # Run the seed script
-    if npx ts-node -r tsconfig-paths/register src/database/seeds/seed.ts; then
+    if npm run seed; then
         print_success "Database seeding completed successfully"
     else
         print_error "Database seeding failed"
@@ -79,17 +90,14 @@ run_seeds() {
     fi
 }
 
-# Create database if it doesn't exist
 create_database() {
     print_status "Ensuring database exists..."
     
-    # Get database name from .env
     DB_NAME=$(grep "^DB_NAME=" "$PROJECT_ROOT/.env" | cut -d '=' -f2)
     if [ -z "$DB_NAME" ]; then
         DB_NAME="nn_seca_tms"
     fi
     
-    # Check if database exists, create if not
     if docker exec nn-seca-tms-db psql -U postgres -lqt | cut -d \| -f 1 | grep -qw "$DB_NAME"; then
         print_success "Database '$DB_NAME' already exists"
     else
@@ -103,7 +111,6 @@ create_database() {
     fi
 }
 
-# Enable UUID extension
 enable_uuid_extension() {
     print_status "Enabling UUID extension..."
     
@@ -119,13 +126,11 @@ enable_uuid_extension() {
     fi
 }
 
-# Check database connection
 check_connection() {
     print_status "Testing database connection..."
     
     cd "$PROJECT_ROOT/server" || exit 1
     
-    # Simple connection test
     if timeout 30 npx ts-node -e "
     import { AppDataSource } from './src/database/data-source';
     AppDataSource.initialize()
@@ -146,7 +151,6 @@ check_connection() {
     fi
 }
 
-# Reset database (optional)
 reset_database() {
     if [ "$1" = "--reset" ]; then
         print_warning "Resetting database..."
@@ -156,7 +160,6 @@ reset_database() {
             DB_NAME="nn_seca_tms"
         fi
         
-        # Drop and recreate database
         docker exec nn-seca-tms-db dropdb -U postgres "$DB_NAME" --if-exists
         docker exec nn-seca-tms-db createdb -U postgres "$DB_NAME"
         enable_uuid_extension
@@ -164,7 +167,6 @@ reset_database() {
     fi
 }
 
-# Show help
 main() {
     case "$1" in
         --help)

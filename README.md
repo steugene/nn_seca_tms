@@ -37,10 +37,6 @@ make setup
 # Start development environment
 make dev
 
-# Setup database
-make db-setup
-```
-
 ### Access
 
 - Frontend: http://localhost:4200

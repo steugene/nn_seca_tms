@@ -7,9 +7,11 @@ help:
 	@echo "  build     - Build applications"
 	@echo "  test      - Run tests"
 	@echo "  db-setup  - Setup database"
+	@echo "  db-seed   - Run database seeds only"
 	@echo "  clean     - Clean containers"
 
 setup:
+	@echo "Starting complete project setup..."
 	chmod +x scripts/setup-env.sh
 	./scripts/setup-env.sh
 	npm run build --workspace=shared
@@ -17,6 +19,7 @@ setup:
 	sleep 15
 	chmod +x scripts/db-setup.sh
 	./scripts/db-setup.sh
+	@echo "Setup complete! Run 'make dev' to start development."
 
 install:
 	npm install
@@ -25,50 +28,56 @@ dev:
 	npm run build --workspace=shared
 	docker-compose up --build
 
-# Database setup (run after containers are up)
 db-setup:
 	@echo "Setting up database..."
+	@if ! docker ps | grep -q nn-seca-tms-db; then \
+		echo "Database container not running. Starting containers..."; \
+		docker-compose up -d; \
+		sleep 15; \
+	fi
 	chmod +x scripts/db-setup.sh
 	./scripts/db-setup.sh
 
-# Reset database
 db-reset:
 	@echo "Resetting database..."
+	@if ! docker ps | grep -q nn-seca-tms-db; then \
+		echo "Database container not running. Starting containers..."; \
+		docker-compose up -d; \
+		sleep 15; \
+	fi
 	chmod +x scripts/db-setup.sh
 	./scripts/db-setup.sh --reset
 
-# Run database seeds only
 db-seed:
 	@echo "Running database seeds..."
-	cd server && npx ts-node -r tsconfig-paths/register src/database/seeds/seed.ts
+	@if ! docker ps | grep -q nn-seca-tms-db; then \
+		echo "Database container not running. Starting containers..."; \
+		docker-compose up -d; \
+		sleep 15; \
+	fi
+	chmod +x scripts/db-seed.sh
+	./scripts/db-seed.sh
 
-# Build applications
 build:
 	npm run build
 
-# Run tests
 test:
 	npm run test
 
-# Run linting
 lint:
 	npm run lint
 
-# Clean up containers and volumes
 clean:
 	docker-compose down -v
 	docker system prune -f
 	npm run clean
 
-# Stop running containers
 stop:
 	docker-compose down
 
-# Show container logs
 logs:
 	docker-compose logs -f
 
-# Rebuild shared library only
 shared:
 	@echo "Rebuilding shared library..."
 	npm run build --workspace=shared
