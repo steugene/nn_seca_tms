@@ -30,7 +30,7 @@
     "@nestjs/platform-express": "^10.3.2",
     "@nestjs/platform-socket.io": "^10.3.2",
     "@nestjs/swagger": "^7.3.0",
-    "@nestjs/typeorm": "^10.0.1",
+    "@nestjs/typeorm": "^11.0.0",
     "@nestjs/websockets": "^10.3.2",
     "@nn-seca-tms/shared": "^1.0.0",
     "bcryptjs": "^2.4.3",
