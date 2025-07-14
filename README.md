@@ -28,6 +28,8 @@ Task management system built with Angular and NestJS. Provides a Trello-like int
 
 ### Setup
 
+Make sure to have node, npm and docker up and running.
+
 ```bash
 # Clone and setup
 git clone <repository-url>
