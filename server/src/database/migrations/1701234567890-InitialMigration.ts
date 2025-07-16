@@ -5,7 +5,7 @@ export class InitialMigration1701234567890 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-      CREATE TABLE "users" (
+      CREATE TABLE IF NOT EXISTS "users" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "email" character varying NOT NULL,
         "username" character varying NOT NULL,
@@ -22,7 +22,7 @@ export class InitialMigration1701234567890 implements MigrationInterface {
     `);
 
     await queryRunner.query(`
-      CREATE TABLE "boards" (
+      CREATE TABLE IF NOT EXISTS "boards" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "title" character varying NOT NULL,
         "description" character varying,
@@ -34,7 +34,7 @@ export class InitialMigration1701234567890 implements MigrationInterface {
     `);
 
     await queryRunner.query(`
-      CREATE TABLE "columns" (
+      CREATE TABLE IF NOT EXISTS "columns" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "title" character varying NOT NULL,
         "boardId" uuid NOT NULL,
@@ -46,7 +46,7 @@ export class InitialMigration1701234567890 implements MigrationInterface {
     `);
 
     await queryRunner.query(`
-      CREATE TABLE "tickets" (
+      CREATE TABLE IF NOT EXISTS "tickets" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "title" character varying NOT NULL,
         "description" character varying,
@@ -66,70 +66,94 @@ export class InitialMigration1701234567890 implements MigrationInterface {
     `);
 
     await queryRunner.query(`
-      ALTER TABLE "boards"
-      ADD CONSTRAINT "FK_boards_createdBy" 
-      FOREIGN KEY ("createdBy") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION
+      DO $$ BEGIN
+        ALTER TABLE "boards"
+        ADD CONSTRAINT "FK_boards_createdBy" 
+        FOREIGN KEY ("createdBy") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+      EXCEPTION
+        WHEN duplicate_object THEN null;
+      END $$;
     `);
 
     await queryRunner.query(`
-      ALTER TABLE "columns"
-      ADD CONSTRAINT "FK_columns_boardId" 
-      FOREIGN KEY ("boardId") REFERENCES "boards"("id") ON DELETE CASCADE ON UPDATE NO ACTION
+      DO $$ BEGIN
+        ALTER TABLE "columns"
+        ADD CONSTRAINT "FK_columns_boardId" 
+        FOREIGN KEY ("boardId") REFERENCES "boards"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+      EXCEPTION
+        WHEN duplicate_object THEN null;
+      END $$;
     `);
 
     await queryRunner.query(`
-      ALTER TABLE "tickets"
-      ADD CONSTRAINT "FK_tickets_assignedTo" 
-      FOREIGN KEY ("assignedTo") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE NO ACTION
+      DO $$ BEGIN
+        ALTER TABLE "tickets"
+        ADD CONSTRAINT "FK_tickets_assignedTo" 
+        FOREIGN KEY ("assignedTo") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE NO ACTION;
+      EXCEPTION
+        WHEN duplicate_object THEN null;
+      END $$;
     `);
 
     await queryRunner.query(`
-      ALTER TABLE "tickets"
-      ADD CONSTRAINT "FK_tickets_createdBy" 
-      FOREIGN KEY ("createdBy") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION
+      DO $$ BEGIN
+        ALTER TABLE "tickets"
+        ADD CONSTRAINT "FK_tickets_createdBy" 
+        FOREIGN KEY ("createdBy") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+      EXCEPTION
+        WHEN duplicate_object THEN null;
+      END $$;
     `);
 
     await queryRunner.query(`
-      ALTER TABLE "tickets"
-      ADD CONSTRAINT "FK_tickets_columnId" 
-      FOREIGN KEY ("columnId") REFERENCES "columns"("id") ON DELETE CASCADE ON UPDATE NO ACTION
+      DO $$ BEGIN
+        ALTER TABLE "tickets"
+        ADD CONSTRAINT "FK_tickets_columnId" 
+        FOREIGN KEY ("columnId") REFERENCES "columns"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+      EXCEPTION
+        WHEN duplicate_object THEN null;
+      END $$;
     `);
 
     await queryRunner.query(`
-      ALTER TABLE "tickets"
-      ADD CONSTRAINT "FK_tickets_boardId" 
-      FOREIGN KEY ("boardId") REFERENCES "boards"("id") ON DELETE CASCADE ON UPDATE NO ACTION
+      DO $$ BEGIN
+        ALTER TABLE "tickets"
+        ADD CONSTRAINT "FK_tickets_boardId" 
+        FOREIGN KEY ("boardId") REFERENCES "boards"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+      EXCEPTION
+        WHEN duplicate_object THEN null;
+      END $$;
     `);
 
     await queryRunner.query(
-      `CREATE INDEX "IDX_boards_createdBy" ON "boards" ("createdBy")`,
+      `CREATE INDEX IF NOT EXISTS "IDX_boards_createdBy" ON "boards" ("createdBy")`,
     );
     await queryRunner.query(
-      `CREATE INDEX "IDX_columns_boardId" ON "columns" ("boardId")`,
+      `CREATE INDEX IF NOT EXISTS "IDX_columns_boardId" ON "columns" ("boardId")`,
     );
     await queryRunner.query(
-      `CREATE INDEX "IDX_columns_order" ON "columns" ("boardId", "order")`,
+      `CREATE INDEX IF NOT EXISTS "IDX_columns_order" ON "columns" ("boardId", "order")`,
     );
     await queryRunner.query(
-      `CREATE INDEX "IDX_tickets_assignedTo" ON "tickets" ("assignedTo")`,
+      `CREATE INDEX IF NOT EXISTS "IDX_tickets_assignedTo" ON "tickets" ("assignedTo")`,
     );
     await queryRunner.query(
-      `CREATE INDEX "IDX_tickets_createdBy" ON "tickets" ("createdBy")`,
+      `CREATE INDEX IF NOT EXISTS "IDX_tickets_createdBy" ON "tickets" ("createdBy")`,
     );
     await queryRunner.query(
-      `CREATE INDEX "IDX_tickets_columnId" ON "tickets" ("columnId")`,
+      `CREATE INDEX IF NOT EXISTS "IDX_tickets_columnId" ON "tickets" ("columnId")`,
     );
     await queryRunner.query(
-      `CREATE INDEX "IDX_tickets_boardId" ON "tickets" ("boardId")`,
+      `CREATE INDEX IF NOT EXISTS "IDX_tickets_boardId" ON "tickets" ("boardId")`,
     );
     await queryRunner.query(
-      `CREATE INDEX "IDX_tickets_order" ON "tickets" ("columnId", "order")`,
+      `CREATE INDEX IF NOT EXISTS "IDX_tickets_order" ON "tickets" ("columnId", "order")`,
     );
     await queryRunner.query(
-      `CREATE INDEX "IDX_tickets_status" ON "tickets" ("status")`,
+      `CREATE INDEX IF NOT EXISTS "IDX_tickets_status" ON "tickets" ("status")`,
     );
     await queryRunner.query(
-      `CREATE INDEX "IDX_tickets_priority" ON "tickets" ("priority")`,
+      `CREATE INDEX IF NOT EXISTS "IDX_tickets_priority" ON "tickets" ("priority")`,
     );
   }
 
