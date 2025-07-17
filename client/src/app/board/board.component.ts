@@ -358,7 +358,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   openCreateTicketDialog(columnId: string): void {
-    const dialogRef = this.dialog.open(CreateTicketDialogComponent, {
+    this.dialog.open(CreateTicketDialogComponent, {
       width: "600px",
       data: {
         boardId: this.boardId,
@@ -369,7 +369,7 @@ export class BoardComponent implements OnInit, OnDestroy {
   }
 
   openEditTicketDialog(ticket: Ticket): void {
-    const dialogRef = this.dialog.open(EditTicketDialogComponent, {
+   this.dialog.open(EditTicketDialogComponent, {
       width: "600px",
       data: {
         ticket: { ...ticket },
