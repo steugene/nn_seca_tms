@@ -366,15 +366,6 @@ export class BoardComponent implements OnInit, OnDestroy {
         users: this.users,
       },
     });
-
-    dialogRef
-      .afterClosed()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((result) => {
-        if (result) {
-          this.tickets.push(result);
-        }
-      });
   }
 
   openEditTicketDialog(ticket: Ticket): void {
@@ -386,18 +377,6 @@ export class BoardComponent implements OnInit, OnDestroy {
         columns: this.columns,
       },
     });
-
-    dialogRef
-      .afterClosed()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((result) => {
-        if (result) {
-          const index = this.tickets.findIndex((t) => t.id === result.id);
-          if (index !== -1) {
-            this.tickets[index] = result;
-          }
-        }
-      });
   }
 
   deleteTicket(ticket: Ticket, event: Event): void {
@@ -409,7 +388,6 @@ export class BoardComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
-            this.tickets = this.tickets.filter((t) => t.id !== ticket.id);
             this.snackBar.open("Ticket deleted successfully", "Close", {
               duration: 3000,
               panelClass: ["success-snackbar"],
