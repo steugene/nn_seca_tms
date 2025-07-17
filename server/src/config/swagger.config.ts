@@ -18,7 +18,7 @@ export const swaggerConfig = new DocumentBuilder()
       scheme: "bearer",
       bearerFormat: "JWT",
       name: "Authorization",
-      description: 'Enter your JWT token (without "Bearer " prefix)',
+      description: 'Enter your JWT token in the format: Bearer <token>',
       in: "header",
     },
     "JWT-auth",

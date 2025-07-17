@@ -26,7 +26,7 @@ import { Board } from "@nn-seca-tms/shared";
 @ApiTags("Boards")
 @Controller("boards")
 @UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
+@ApiBearerAuth("JWT-auth")
 export class BoardsController {
   constructor(private readonly boardsService: BoardsService) {}
 

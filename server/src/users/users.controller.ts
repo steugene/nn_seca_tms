@@ -13,7 +13,7 @@ import { User } from "@nn-seca-tms/shared";
 @ApiTags("Users")
 @Controller("users")
 @UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
+@ApiBearerAuth("JWT-auth")
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
