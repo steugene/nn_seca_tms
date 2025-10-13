@@ -109,12 +109,12 @@ jobs:
         npm audit --audit-level=high --workspace=client || echo "Client has moderate dev-only vulnerabilities - see SECURITY.md for details"
     
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
+      uses: github/codeql-action/init@v4
       with:
         languages: javascript
     
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
+      uses: github/codeql-action/analyze@v4
 
   docker:
     runs-on: ubuntu-latest
